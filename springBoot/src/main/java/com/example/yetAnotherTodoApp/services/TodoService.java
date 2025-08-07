@@ -4,6 +4,7 @@ import com.example.yetAnotherTodoApp.exceptions.TodoAlreadyExistsException;
 import com.example.yetAnotherTodoApp.exceptions.TodoNotFoundException;
 import com.example.yetAnotherTodoApp.exceptions.TodoUnexpectedSyntax;
 import com.example.yetAnotherTodoApp.models.Todo;
+import com.example.yetAnotherTodoApp.models.TodoUpdateRequest;
 import com.example.yetAnotherTodoApp.repositories.TodoRepository;
 import org.springframework.stereotype.Service;
 
@@ -31,7 +32,10 @@ public class TodoService {
     }
 
     public Todo createTodo(Todo todo) {
-        if (todo.getId() != 0) {
+        if (todo.getTitle() == null || todo.getCompleted() == null) {
+            throw new TodoUnexpectedSyntax("creating a new todo without necessary fields.");
+        }
+        if (todo.getId() != null) {
             throw new TodoUnexpectedSyntax("creating a new todo with an id, that is already auto-generated. To perform an update use another appropriate method.");
         }
         if (todoRepository.findByTitle(todo.getTitle()).isPresent()) {
@@ -43,20 +47,28 @@ public class TodoService {
         return todoRepository.save(todo);
     }
 
-    public Todo updateTodoTitle(long id, String newTitle) {
+    public Todo updateTodo(long id, TodoUpdateRequest todoUpdateRequest) {
+        if (todoUpdateRequest.getTitle() == null && todoUpdateRequest.getCompleted() == null) {
+            throw new TodoUnexpectedSyntax("both title and completed fields are empty, please provide a value for at least one of them.");
+        }
+
+        if (todoUpdateRequest.getTitle() != null) {
+            if (todoUpdateRequest.getTitle().isEmpty()) {
+                throw new TodoUnexpectedSyntax("the field named title must either be null or have a length greater than zero.");
+            }
+        }
         Todo todo = todoRepository.findById(id)
                 .orElseThrow(() -> new TodoNotFoundException(id));
 
-        todo.setTitle(newTitle);
-        todo.setModificationDate(LocalDateTime.now());
-        return todoRepository.save(todo);
-    }
-
-    public Todo updateTodoStatus(long id, boolean newStatus) {
-        Todo todo = todoRepository.findById(id)
-                .orElseThrow(() -> new TodoNotFoundException(id));
-
-        todo.setCompleted(newStatus);
+        if (todoUpdateRequest.getTitle() != null) {
+            if (todoRepository.findByTitle(todoUpdateRequest.getTitle()).isPresent()) {
+                throw new TodoAlreadyExistsException(todoUpdateRequest.getTitle());
+            }
+            todo.setTitle(todoUpdateRequest.getTitle());
+        }
+        if (todoUpdateRequest.getCompleted() != null) {
+            todo.setCompleted(todoUpdateRequest.getCompleted());
+        }
         todo.setModificationDate(LocalDateTime.now());
         return todoRepository.save(todo);
     }

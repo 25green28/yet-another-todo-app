@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 public class Todo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    long id;
+    Long id;
     String title;
     Boolean completed;
     @Column(name = "modification_date")

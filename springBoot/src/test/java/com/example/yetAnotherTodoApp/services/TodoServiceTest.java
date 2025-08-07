@@ -2,6 +2,7 @@ package com.example.yetAnotherTodoApp.services;
 
 import com.example.yetAnotherTodoApp.exceptions.*;
 import com.example.yetAnotherTodoApp.models.Todo;
+import com.example.yetAnotherTodoApp.models.TodoUpdateRequest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -128,7 +129,7 @@ public class TodoServiceTest {
             Todo newTodo = new Todo();
             newTodo.setTitle("Write to friend");
             newTodo.setCompleted(true);
-            newTodo.setId(1);
+            newTodo.setId(1L);
 
             todoService.createTodo(newTodo);
         });
@@ -144,11 +145,28 @@ public class TodoServiceTest {
     }
 
     @Test
+    public void shouldThrowAnExceptionWhenCreatingTodoWithIncompleteBody() {
+        final Todo todoWithoutStatus = new Todo();
+        todoWithoutStatus.setTitle("Without status");
+
+        assertThrows(TodoUnexpectedSyntax.class, () -> {
+            todoService.createTodo(todoWithoutStatus);
+        });
+
+        final Todo todoWithoutTitle = new Todo();
+        todoWithoutTitle.setCompleted(true);
+
+        assertThrows(TodoUnexpectedSyntax.class, () -> {
+            todoService.createTodo(todoWithoutTitle);
+        });
+    }
+
+    @Test
     @Transactional
     public void shouldUpdateTodoTitle() {
         long todoId = 1;
         String newTitle = "Pass a driving test";
-        Todo modifiedTodo = todoService.updateTodoTitle(todoId, newTitle);
+        Todo modifiedTodo = todoService.updateTodo(todoId, new TodoUpdateRequest(newTitle));
         checkUpdatedTodoTitle(modifiedTodo, todoId, newTitle);
 
         modifiedTodo = todoService.getTodo(todoId);
@@ -162,18 +180,11 @@ public class TodoServiceTest {
     }
 
     @Test
-    public void shouldThrownAnExceptionWhenUpdatingTodoTitleWithWrongIndex() {
-        assertThrows(TodoNotFoundException.class, () -> {
-            todoService.updateTodoTitle(9999, "Pass a driving test");
-        });
-    }
-
-    @Test
     @Transactional
     public void shouldUpdateTodoStatus() {
         long todoId = 1;
         boolean newStatus = true;
-        Todo modifiedTodo = todoService.updateTodoStatus(todoId, newStatus);
+        Todo modifiedTodo = todoService.updateTodo(todoId, new TodoUpdateRequest(newStatus));
         checkUpdatedTodoStatus(modifiedTodo, todoId, newStatus);
 
         modifiedTodo = todoService.getTodo(todoId);
@@ -187,9 +198,48 @@ public class TodoServiceTest {
     }
 
     @Test
-    public void shouldThrowAnExceptionWhenUpdatingTodoStatusWithWrongIndex() {
+    @Transactional
+    public void shouldUpdateTodoTitleAndStatus() {
+        long todoId = 3;
+        String newTitle = "Go to cinema";
+        boolean newStatus = true;
+        Todo modifedTodo = todoService.updateTodo(todoId, new TodoUpdateRequest(newTitle, newStatus));
+        checkUpdatedTodo(modifedTodo, todoId, newTitle, newStatus);
+
+        modifedTodo = todoService.getTodo(3);
+        checkUpdatedTodo(modifedTodo, todoId, newTitle, newStatus);
+    }
+
+    private void checkUpdatedTodo(Todo modifiedTodo, long todoIndex, String newTitle, Boolean newStatus) {
+        assertEquals(todoIndex, modifiedTodo.getId());
+        assertEquals(newTitle, modifiedTodo.getTitle());
+        assertEquals(newStatus, modifiedTodo.getCompleted());
+        assertNotEquals(modifiedTodo.getModificationDate(), modifiedTodo.getCreationDate());
+    }
+
+    @Test
+    public void shouldThrowAnExceptionWhenUpdatingTodoWithEmptyTitle() {
+        long todoId = 3;
+        assertThrows(TodoUnexpectedSyntax.class, () -> {
+            todoService.updateTodo(todoId, new TodoUpdateRequest("", false));
+        });
+
+        assertThrows(TodoUnexpectedSyntax.class, () -> {
+            todoService.updateTodo(todoId, new TodoUpdateRequest(""));
+        });
+    }
+
+    @Test
+    public void shouldThrowAnExceptionWhenUpdatingTodoWithWrongIndex() {
         assertThrows(TodoNotFoundException.class, () -> {
-            todoService.updateTodoStatus(9999, false);
+            todoService.updateTodo(9999, new TodoUpdateRequest("abc", false));
+        });
+    }
+
+    @Test
+    public void shouldThrowAnExceptionWhenUpdatingTodoWithAlreadyTakenName() {
+        assertThrows(TodoAlreadyExistsException.class, () -> {
+            todoService.updateTodo(1, new TodoUpdateRequest("Dishes"));
         });
     }
 
