@@ -3,6 +3,8 @@ package com.example.yetAnotherTodoApp.models;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -14,13 +16,13 @@ public class TodoModelTest {
         todo.setId(10);
         todo.setTitle("TODO");
         todo.setCompleted(false);
-        todo.setCreationDate(Date.from(Instant.EPOCH));
-        todo.setModificationDate(Date.from(Instant.EPOCH));
+        todo.setCreationDate(LocalDateTime.ofInstant(Instant.EPOCH, ZoneOffset.ofHours(2)));
+        todo.setModificationDate(LocalDateTime.ofInstant(Instant.EPOCH, ZoneOffset.ofHours(2)));
 
         assertEquals(10, todo.getId());
         assertEquals("TODO", todo.getTitle());
         assertEquals(false, todo.getCompleted());
-        assertEquals(Date.from(Instant.EPOCH), todo.getCreationDate());
-        assertEquals(Date.from(Instant.EPOCH), todo.getModificationDate());
+        assertEquals(LocalDateTime.ofInstant(Instant.EPOCH, ZoneOffset.ofHours(2)), todo.getCreationDate());
+        assertEquals(LocalDateTime.ofInstant(Instant.EPOCH, ZoneOffset.ofHours(2)), todo.getModificationDate());
     }
 }
