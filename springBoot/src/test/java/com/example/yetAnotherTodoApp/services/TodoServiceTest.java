@@ -115,6 +115,27 @@ public class TodoServiceTest {
     }
 
     @Test
+    @Transactional
+    public void shouldAddNewTodoOnlyWithTitle() {
+        Todo todoToCreate = new Todo();
+        todoToCreate.setTitle("Go to the gym");
+
+        Todo createdTodo = todoService.createTodo(todoToCreate);
+        checkTodoOnlyWithTitle(createdTodo, todoToCreate);
+
+        createdTodo = todoService.getTodo(createdTodo.getId());
+        checkTodoOnlyWithTitle(createdTodo, todoToCreate);
+    }
+
+    static void checkTodoOnlyWithTitle(Todo createdTodo, Todo expectedTodo) {
+        assertNotNull(createdTodo);
+        assertEquals(expectedTodo.getTitle(), createdTodo.getTitle());
+        assertEquals(false, createdTodo.getCompleted());
+        assertNotNull(createdTodo.getCreationDate());
+        assertNotNull(createdTodo.getModificationDate());
+    }
+
+    @Test
     public void shouldNotCreateDuplicatedTodo() {
         assertThrows(TodoAlreadyExistsException.class, () -> {
             todoService.createTodo(new Todo("Dishes", false));
@@ -146,16 +167,19 @@ public class TodoServiceTest {
 
     @Test
     public void shouldThrowAnExceptionWhenCreatingTodoWithIncompleteBody() {
-        final Todo todoWithoutStatus = new Todo();
-        todoWithoutStatus.setTitle("Without status");
+        final Todo emptyTodoWithoutFields = new Todo();
+        assertThrows(TodoUnexpectedSyntax.class, () -> {
+            todoService.createTodo(emptyTodoWithoutFields);
+        });
 
+        final Todo todoWithoutStatus = new Todo();
+        todoWithoutStatus.setTitle("");
         assertThrows(TodoUnexpectedSyntax.class, () -> {
             todoService.createTodo(todoWithoutStatus);
         });
 
         final Todo todoWithoutTitle = new Todo();
         todoWithoutTitle.setCompleted(true);
-
         assertThrows(TodoUnexpectedSyntax.class, () -> {
             todoService.createTodo(todoWithoutTitle);
         });

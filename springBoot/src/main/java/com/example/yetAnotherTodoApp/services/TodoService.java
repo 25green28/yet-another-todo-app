@@ -32,8 +32,14 @@ public class TodoService {
     }
 
     public Todo createTodo(Todo todo) {
-        if (todo.getTitle() == null || todo.getCompleted() == null) {
-            throw new TodoUnexpectedSyntax("creating a new todo without necessary fields.");
+        if (todo.getCompleted() == null) {
+            todo.setCompleted(false);
+        }
+        if (todo.getTitle() == null) {
+            throw new TodoUnexpectedSyntax("creating a new todo without title isn't allowed.");
+        }
+        if (todo.getTitle().isEmpty()) {
+            throw new TodoUnexpectedSyntax("creating a new todo with empty title isn't allowed.");
         }
         if (todo.getId() != null) {
             throw new TodoUnexpectedSyntax("creating a new todo with an id, that is already auto-generated. To perform an update use another appropriate method.");
