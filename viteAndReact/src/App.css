@@ -1,3 +1,46 @@
+.overlay {
+  height: 100vh;
+  width: 100vw;
+  position: fixed;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  background-color: rgb(0, 0, 0);
+  background-color: rgba(0, 0, 0, 0.7);
+  overflow-y: hidden;
+  transition: 0.5s;
+  display: flex;
+  justify-content: center;
+  align-content: center;
+}
+
+.overlayContent {
+  padding: 20px;
+  border-radius: 20px;
+  background-color: rgb(0, 0, 0);
+  height: min-content;
+  width: min(350px, 50vw);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-self: center;
+  align-items: center;
+}
+
+.overlayButton {
+  margin-top: 2vh;
+}
+
+.overlayTitle {
+  font-size: 1.5rem;
+  margin-bottom: 2vh;
+}
+
+.overlayDescription {
+  text-align: center;
+  font-size: 1.1rem;
+}
+
 .mainContainer {
   display: flex;
   flex-direction: column;
@@ -35,7 +78,7 @@
 
 .addTodoButton {
   border-radius: 1rem;
-  border: solid 1px greenyellow;
+  border: solid 1px dimgray;
   text-align: center;
   font-size: 1.1rem;
   min-width: 80px;
@@ -45,4 +88,16 @@
   width: min(500px, 100vw);
   text-align: center;
   font-size: min(45px, 9vw);
+}
+
+@media (prefers-color-scheme: light) {
+  .overlayContent {
+    background-color: #eaeaea;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .overlayContent {
+    border: 1px solid white;
+  }
 }
