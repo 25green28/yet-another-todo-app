@@ -1,0 +1,35 @@
+.todoBox {
+    border-radius: 20px;
+    border: 1.5px solid;
+    padding: 5px;
+    display: flex;
+    justify-content: space-between;
+    margin: 7.5px;
+}
+
+.completedButton {
+    width: max(25px, min(3vw, 3vh));
+    height: max(25px, min(3vh, 3vh));
+    align-self: center;
+    margin-left: min(2vw, 2vh);
+}
+
+.deleteButton {
+    background-color: transparent;
+}
+
+.titleInputField {
+    font-size: 1.3rem;
+    background-color: transparent;
+    border: none;
+    width: 100%;
+    margin-right: 0.5rem;
+    margin-left: 0.5rem;
+    border-radius: 10px;
+    padding-left: 10px;
+    padding-right: 10px;
+    text-align: center;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
