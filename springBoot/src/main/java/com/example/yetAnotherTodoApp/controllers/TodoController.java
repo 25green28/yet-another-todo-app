@@ -14,8 +14,10 @@ import java.util.List;
 @RequestMapping("/todos")
 public class TodoController {
     TodoService todoService;
+    TodoSseController todoSseController;
 
-    public TodoController(TodoService todoService) {
+    public TodoController(TodoService todoService, TodoSseController todoSseController) {
+        this.todoSseController = todoSseController;
         this.todoService = todoService;
     }
 
@@ -25,7 +27,7 @@ public class TodoController {
         return ResponseEntity.ok(todos);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/{id:\\d+}")
     public ResponseEntity<Todo> getTodo(@PathVariable long id) {
         Todo todo = todoService.getTodo(id);
         return ResponseEntity.ok(todo);
@@ -34,6 +36,7 @@ public class TodoController {
     @PostMapping()
     public ResponseEntity<Todo> createTodo(@RequestBody Todo todoToCreate) {
         Todo createdTodo = todoService.createTodo(todoToCreate);
+        todoSseController.notifyAboutTodoCreation(createdTodo);
         URI uri = ServletUriComponentsBuilder
                 .fromCurrentRequestUri()
                 .path("/{itemId}")
@@ -45,12 +48,14 @@ public class TodoController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTodo(@PathVariable long id) {
         todoService.deleteTodo(id);
+        todoSseController.notifyAboutTodoDeletion(id);
         return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Todo> updateTodo(@PathVariable long id, @RequestBody TodoUpdateRequest todoUpdateRequest) {
         Todo updatedTodo = todoService.updateTodo(id, todoUpdateRequest);
+        todoSseController.notifyAboutTodoUpdate(updatedTodo);
         return ResponseEntity.ok(updatedTodo);
     }
 }
