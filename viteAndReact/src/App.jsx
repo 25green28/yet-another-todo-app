@@ -22,6 +22,23 @@ function App() {
       }
     }
     fetchData().then(r => setTodos(r));
+    const eventSource = new EventSource("/api/todos/sse")
+    eventSource.addEventListener("todo-deleted", (event) => {
+      const idToRemove = JSON.parse(event.data).id;
+      setTodos(todos =>
+        todos.filter(todo => todo.id !== idToRemove)
+      )
+    })
+    eventSource.addEventListener("todo-created", (event) => {
+      setTodos(todos => [JSON.parse(event.data), ...todos])
+    })
+    eventSource.addEventListener("todo-updated", (event) => {
+      const updatedTodo = JSON.parse(event.data)
+      setTodos(todos =>
+        todos.map(todo => todo.id === updatedTodo.id ? { ...updatedTodo } : todo)
+      )
+    })
+    return () => eventSource.close()
   }, [])
 
   async function updateCompletedState(id, newState) {
@@ -36,14 +53,7 @@ function App() {
 
     if (!response.ok) {
       updateOverlay(true, "Unable to update a todo status", '')
-      return
     }
-
-    const updatedTodo = await response.json()
-
-    setTodos(todos =>
-      todos.map(todo => todo.id === updatedTodo.id ? updatedTodo : todo)
-    )
   }
 
   async function updateTodoTitle(id, newTitle) {
@@ -59,25 +69,7 @@ function App() {
     if (!response.ok) {
       throw await response.json()
     }
-
-    const updatedTodoTitle = await response.json();
-
-    setTodos(todos =>
-      todos.map(todo => todo.id === updatedTodoTitle.id ? updatedTodoTitle : todo)
-    )
   }
-
-  // async function updateTodo(id) {
-  //   const url = `/api/todos/${id}`
-  //   await fetch(url)
-  //   .then(r => r.json())
-  //   .then(fetchedTodo =>
-  //     setTodos(todos =>
-  //       todos.map(todo =>
-  //         todo.id === fetchedTodo.id ? fetchedTodo : todo)
-  //     )
-  //   ).catch(e => console.log(e));
-  // }
 
   async function handleTodoCreation(e) {
     e.preventDefault();
@@ -88,7 +80,7 @@ function App() {
       return
     }
     setTodoTitle('');
-    createNewTodo(todoTitle)
+    await createNewTodo(todoTitle)
   }
 
   async function createNewTodo(title) {
@@ -101,11 +93,7 @@ function App() {
       body: JSON.stringify({title: title})
     });
 
-    if (response.ok) {
-      const newTodo = await response.json();
-
-      setTodos(todos => [newTodo, ...todos])
-    } else {
+    if (!response.ok) {
       const responseJson = await response.json();
       if (responseJson.error === "TodoAlreadyExistsException") {
         updateOverlay(true, 'Wrong title', `The todo with title '${title}' already exists`);
@@ -121,11 +109,7 @@ function App() {
       method: "DELETE",
     });
 
-    if (response.ok) {
-      setTodos(todos =>
-      todos.filter(todo => todo.id !== id)
-     )
-    } else {
+    if (!response.ok) {
       updateOverlay(true, `Unable to delete todo number ${id}`, '')
     }
   }

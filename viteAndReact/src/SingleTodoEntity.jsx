@@ -1,9 +1,13 @@
 import './SingleTodoEntity.css'
-import {useRef, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 
 function TodoEntity({id, name, completed, updateCompleted, updateTitle, deleteTodo, showDialog}) {
   const [todoTitle, setTodoTitle] = useState(name);
   const inputRef = useRef(null);
+
+  useEffect(() => {
+    setTodoTitle(name);
+  }, [name]);
 
   async function handleTitleUpdate() {
     try {
@@ -28,11 +32,12 @@ function TodoEntity({id, name, completed, updateCompleted, updateTitle, deleteTo
           <input
             type="checkbox"
             name="completed"
-            defaultChecked={completed}
+            checked={completed}
             onChange={() => updateCompleted(id, !completed)}
             className="completedButton"
           />
           <input
+            name="todoTitle"
             ref={inputRef}
             type="text"
             value={todoTitle}
