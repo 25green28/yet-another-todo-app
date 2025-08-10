@@ -20,7 +20,7 @@ public class TodoSseController {
     private final List<SseEmitter> emitters = new CopyOnWriteArrayList<>();
     private final ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
 
-    @GetMapping("/todos/sse")
+    @GetMapping(value = "/todos/sse", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter subscribeToTodoUpdated() {
         SseEmitter emitter = new SseEmitter(Long.MAX_VALUE);
         emitters.add(emitter);
@@ -40,7 +40,6 @@ public class TodoSseController {
                         .data(objectMapper.writeValueAsString(todo), MediaType.APPLICATION_JSON)
                 );
             } catch (IOException e) {
-                System.out.println(e);
                 emitter.complete();
                 emitters.remove(emitter);
             }
