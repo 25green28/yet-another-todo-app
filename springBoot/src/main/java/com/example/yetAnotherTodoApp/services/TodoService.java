@@ -59,7 +59,7 @@ public class TodoService {
         }
 
         if (todoUpdateRequest.getTitle() != null) {
-            if (todoUpdateRequest.getTitle().isEmpty()) {
+            if (todoUpdateRequest.getTitle().trim().isEmpty()) {
                 throw new TodoUnexpectedSyntax("the field named title must either be null or have a length greater than zero.");
             }
         }
