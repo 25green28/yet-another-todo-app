@@ -36,7 +36,16 @@ Apache Maven 3.9.11 -> Complie the Spring Boot application from CLI
 ```
 
 ### Additional info about database
-Currently only the H2 (in-memory) database is used, both in production and test environments. I plan to change the H2 to be usable only in tests, and my local PostgreSQL server to be used in production mode to avoid losing data when the application is restarted. 
+Currently, I have set up a default support for my own locally running PostgreSQL server. If you don't want to configure your own, you can simply change the property in ```springBoot/src/main/resources/application.properties```  
+
+from ```spring.profiles.active=postgres``` 
+
+to ```spring.profiles.active=h2```
+
+> [!WARNING]
+> The H2 database is an in-memory database, which means that all data will be lost after the application restarts.
+
+If you would like to configure your own PostgreSQL database, you can modify the properties in ```springBoot/src/main/resources/application-postgres.properties```
 
 ### (Maybe) Future ideas:
 - Implement Spring Web Security
